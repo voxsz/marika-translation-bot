@@ -17,7 +17,7 @@ client = discord.Client(intents=intents)
 DEEPL_API_URL = "https://api-free.deepl.com/v2/translate"
 
 def detect_language(text):
-    # 日本語文字が含まれていれば「JA」、それ以外は「EN」
+    # 日本語の文字（ひらがな・カタカナ・漢字）が含まれていたら「JA」
     if re.search(r'[\u3040-\u30ff\u4e00-\u9fff]', text):
         return 'JA'
     else:
@@ -29,8 +29,12 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    # 自分自身 or 他Botのメッセージは無視
-    if message.author == client.user or message.author.bot:
+    # 自分自身のメッセージは無視
+    if message.author == client.user:
+        return
+
+    # 他のBot or すでに翻訳されたメッセージも無視
+    if message.author.bot or message.content.startswith("🌐 翻訳"):
         return
 
     source_lang = detect_language(message.content)

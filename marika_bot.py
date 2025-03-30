@@ -4,13 +4,11 @@ import re
 import os
 from dotenv import load_dotenv
 
-# 環境変数を読み込む
+# 環境変数の読み込み
 load_dotenv()
 
-# ====== 設定（環境変数から取得）======
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 DEEPL_API_KEY = os.getenv('DEEPL_API_KEY')
-# ========================================
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -19,6 +17,7 @@ client = discord.Client(intents=intents)
 DEEPL_API_URL = "https://api-free.deepl.com/v2/translate"
 
 def detect_language(text):
+    # 日本語文字が含まれていれば「JA」、それ以外は「EN」
     if re.search(r'[\u3040-\u30ff\u4e00-\u9fff]', text):
         return 'JA'
     else:
@@ -30,7 +29,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author == client.user:
+    # 自分自身 or 他Botのメッセージは無視
+    if message.author == client.user or message.author.bot:
         return
 
     source_lang = detect_language(message.content)
@@ -51,4 +51,3 @@ async def on_message(message):
         await message.channel.send('⚠️ 翻訳エラーが発生しました')
 
 client.run(DISCORD_TOKEN)
-
